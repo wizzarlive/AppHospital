@@ -13,13 +13,13 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    
+
 
     Route::get('/appointments', function () {
         return view('appointments.index');
     })->name('appointments.index');
 
-        Route::get('/patients', function () {
+    Route::get('/patients', function () {
         return view('patients.index');
     })->name('patients.index');
 
@@ -28,4 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::resource('patients', controller: App\Http\Controllers\PatientController::class);
+
+
+require __DIR__ . '/auth.php';
