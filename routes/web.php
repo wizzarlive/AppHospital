@@ -23,12 +23,15 @@ Route::middleware('auth')->group(function () {
         return view('patients.index');
     })->name('patients.index');
 
+    Route::get('/doctors', function () {
+        return view('doctors.index');
+    })->name('doctors.index');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::resource('patients', controller: App\Http\Controllers\PatientController::class);
-
+Route::resource('patients', App\Http\Controllers\PatientController::class);
 
 require __DIR__ . '/auth.php';

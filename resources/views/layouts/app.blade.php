@@ -52,6 +52,14 @@
                         </svg>
                         Pacientes
                     </a>
+
+                    <a href="/doctors" class="flex items-center p-3 text-base font-semibold rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition duration-150 
+                    {{ Request::is('doctors') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-700' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M12 20.573V15m0 0a2 2 0 100-4 2 2 0 000 4z" />
+                        </svg>
+                        Doctores
+                    </a>
                 </nav>
 
                 <div class="mt-auto pt-6 border-t border-gray-200">
