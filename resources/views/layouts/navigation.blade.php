@@ -60,11 +60,11 @@
             </a>
 
             {{-- Reportes (NUEVO - Placeholder) --}}
-            <a href="/reports" class="group flex items-center p-3 text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out {{ Request::is('reports*') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+            <a href="/clinical_records" class="group flex items-center p-3 text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out {{ Request::is('clinical_records') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 {{ Request::is('reports*') ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Reportes
+                Historial Medico
             </a>
 
         </nav>
@@ -84,9 +84,7 @@
     </div>
 </aside>
 
-{{-- ========================================== --}}
-{{-- VISTA MÓVIL (Barra Inferior Fija)          --}}
-{{-- ========================================== --}}
+
 <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 md:hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] overflow-x-auto">
     <div class="flex justify-between items-center h-16 px-4 min-w-max sm:min-w-0 sm:justify-around space-x-6 sm:space-x-0">
         
@@ -131,11 +129,11 @@
         </a>
 
         {{-- Reportes Móvil --}}
-        <a href="/reports" class="flex flex-col items-center justify-center min-w-[3rem] space-y-1 {{ Request::is('reports*') ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+        <a href="/clinical_records" class="flex flex-col items-center justify-center min-w-[3rem] space-y-1 {{ Request::is('clinical_records') ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span class="text-[9px] font-medium">Reportes</span>
+            <span class="text-[9px] font-medium">Historial Medico</span>
         </a>
 
         {{-- Logout Móvil --}}

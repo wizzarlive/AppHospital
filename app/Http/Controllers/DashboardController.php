@@ -5,48 +5,44 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Specialty; // Importante: No olvides importar este modelo
 use Illuminate\Http\Request;
-use Carbon\Carbon; // Para manejar fechas
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // --- 1. OBTENER ESTADÍSTICAS (Usando tus modelos actuales) ---
+        // --- 1. TARJETAS DE TOTALES (KPIs) ---
+        // Usamos count() para obtener el número total de registros en cada tabla
+        $totalDoctors       = Doctor::count();
+        $totalAppointments  = Appointment::count();
+        $totalPatients      = Patient::count();
+        $totalSpecialties   = Specialty::count();
 
-        // Contar citas con estado 'scheduled' (programada)
-        $pendingAppointments = Appointment::where('status', 'scheduled')->count();
+        // --- 2. DATOS PARA LOS MODALES (Selects) ---
+        // Estas consultas son obligatorias para llenar los formularios emergentes
         
-        // Contar pacientes creados este mes
-        $newPatients = Patient::whereMonth('created_at', Carbon::now()->month)
-                              ->whereYear('created_at', Carbon::now()->year)
-                              ->count();
+        // Pacientes activos ordenados por apellido
+        $patients    = Patient::where('is_active', true)->orderBy('last_name')->get();
         
-        // Contar total de doctores
-        $activeDoctors = Doctor::count();
+        // Doctores con su usuario asociado (para mostrar el nombre)
+        $doctors     = Doctor::with('user')->get();
+        
+        // Especialidades ordenadas alfabéticamente
+        $specialties = Specialty::orderBy('name')->get();
 
-        // Contar citas canceladas hoy
-        $canceledToday = Appointment::where('status', 'canceled')
-                                    ->whereDate('updated_at', Carbon::today())
-                                    ->count();
-
-        // --- 2. LISTA DE PRÓXIMAS CITAS ---
-        // Usamos las relaciones que ya tienes en tu modelo Appointment: patient, doctor, specialty
-        $upcomingAppointments = Appointment::with(['patient', 'doctor.user', 'specialty'])
-            ->whereDate('appointment_date', '>=', Carbon::today()) // Desde hoy
-            ->where('status', 'scheduled') // Solo las programadas
-            ->orderBy('appointment_date', 'asc')
-            ->orderBy('appointment_time', 'asc')
-            ->take(5) // Solo las 5 primeras
-            ->get();
-
-        // --- 3. ENVIAR DATOS A LA VISTA ---
+        // Enviamos todas las variables a la vista usando compact()
         return view('dashboard', compact(
-            'pendingAppointments', 
-            'newPatients', 
-            'activeDoctors', 
-            'canceledToday',
-            'upcomingAppointments'
+            // Variables para las Tarjetas
+            'totalDoctors',
+            'totalAppointments',
+            'totalPatients',
+            'totalSpecialties',
+            
+            // Variables para los Modales
+            'patients',
+            'doctors',
+            'specialties'
         ));
     }
 }
