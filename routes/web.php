@@ -1,37 +1,28 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\DoctorController; // <--- 1. AGREGA ESTA LÍNEA
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 1. RUTA DE DASHBOARD
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
 
-Route::middleware('auth')->group(function () {
-
-
-    Route::get('/appointments', function () {
-        return view('appointments.index');
-    })->name('appointments.index');
-
-    Route::get('/patients', function () {
-        return view('patients.index');
-    })->name('patients.index');
-
-    Route::get('/doctors', function () {
-        return view('doctors.index');
-    })->name('doctors.index');
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::resource('patients', App\Http\Controllers\PatientController::class);
+    Route::resource('patients', PatientController::class);
+    Route::resource('doctors', DoctorController::class);
+    Route::view('/appointments', 'appointments.index')->name('appointments.index');
+
+});
 
 require __DIR__ . '/auth.php';

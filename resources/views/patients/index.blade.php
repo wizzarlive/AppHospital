@@ -1,28 +1,35 @@
 @extends('layouts.app')
 
 @section('title', 'Pacientes')
-
-@section('header', 'Gestión de Pacientes del Centro Médico')
+@section('header', 'Gestión de Pacientes')
 
 @section('content')
-    <?php
-        if (!isset($patients)) {
-            $patients = collect();
-        }
-    ?>
-    <div class="space-y-6">
 
+    {{-- 
+      CONTENEDOR PRINCIPAL 
+      Observa lo limpio que queda: x-data llama a la función definida al final 
+    --}}
+    <div x-data="patientManagement" class="space-y-8 pb-20">
+
+        {{-- Mensajes Flash (Éxito) --}}
         @if (session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md" role="alert">
-                <p class="font-bold">¡Operación Exitosa!</p>
-                <p>{{ session('success') }}</p>
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-xl shadow-sm flex items-center animate-fade-in-down">
+                <svg class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <div>
+                    <p class="font-bold">¡Excelente!</p>
+                    <p class="text-sm">{{ session('success') }}</p>
+                </div>
             </div>
         @endif
-        
+
+        {{-- Mensajes de Error --}}
         @if ($errors->any())
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
-                <p class="font-bold">Error de Validación:  Por favor, revisa los campos.</p>
-                <ul>
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-xl shadow-sm animate-fade-in-down">
+                <p class="font-bold flex items-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Atención requerida:
+                </p>
+                <ul class="list-disc list-inside text-sm mt-1 ml-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -30,242 +37,240 @@
             </div>
         @endif
 
-        <div class="bg-white shadow-lg rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0 border-t-4 border-indigo-600">
-            
-            <div class="relative w-full sm:w-1/2 lg:w-1/3">
-                <input type="text" placeholder="Buscar por Nombre, DNI o Teléfono..." class="w-full pl-10 pr-4 py-3 border-gray-300 rounded-xl shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150 text-base">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        {{-- CABECERA: Buscador y Botón Crear --}}
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="relative w-full md:w-96">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <input type="text" placeholder="Buscar por nombre o DNI..." class="pl-10 w-full border-gray-200 rounded-xl py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
             </div>
             
-            <button onclick="openModal('registerPatientModal')" class="bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-md w-full sm:w-auto text-base">
-                + Registrar Nuevo Paciente
+            <button @click="openCreate()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nuevo Paciente
             </button>
         </div>
 
-        <div class="space-y-4">
+        {{-- LISTADO DE PACIENTES (Cards) --}}
+        <div class="grid grid-cols-1 gap-6">
             @forelse ($patients as $patient)
-                <div class="bg-white shadow-xl rounded-2xl p-4 sm:p-6 border border-gray-100 transition duration-300 hover:shadow-2xl hover:border-indigo-200">
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        
-                        <div class="md:col-span-4 space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Paciente</p>
-                            <p class="text-lg font-extrabold text-gray-900">{{ $patient->first_name }} {{ $patient->last_name }}</p>
-                            <p class="text-base font-medium text-indigo-600">DNI: {{ $patient->dni ?? 'N/A' }}</p>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 flex flex-col md:flex-row items-start md:items-center gap-6">
+                    
+                    {{-- Avatar / Iniciales --}}
+                    <div class="flex-shrink-0">
+                        <div class="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-2xl">
+                            {{ substr($patient->first_name, 0, 1) }}{{ substr($patient->last_name, 0, 1) }}
                         </div>
+                    </div>
 
-                        <div class="md:col-span-4 space-y-1 border-l md:pl-6 border-gray-200">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Contacto</p>
-                            <p class="text-base text-gray-700">Teléfono: {{ $patient->phone ?? 'N/A' }}</p>
-                            <p class="text-base text-gray-700">Email: {{ $patient->email ?? 'N/A' }}</p>
-                        </div>
-
-                        <div class="md:col-span-2 space-y-1 border-l md:pl-6 border-gray-200">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha Nacimiento</p>
-                            <p class="text-base text-gray-700">{{ $patient->birth_date ? (is_string($patient->birth_date) ? $patient->birth_date : $patient->birth_date->format('d/m/Y')) : 'N/A' }}</p>
-                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $patient->is_active ?? true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $patient->is_active ?? true ? 'Activo' : 'Inactivo' }}
+                    {{-- Información Principal --}}
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-bold text-gray-900 truncate">{{ $patient->first_name }} {{ $patient->last_name }}</h3>
+                        <div class="flex flex-wrap gap-3 mt-1 text-sm text-gray-500">
+                            <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0c0 .883-.393 1.627-1.066 2.127-1.473 1.067-1.637 2.803-1.637 2.803h5.273S12.627 8.193 11.153 7.127C10.48 6.627 10.087 5.883 10.087 5z"/></svg>
+                                {{ $patient->dni ?? 'Sin DNI' }}
+                            </span>
+                            <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                {{ $patient->phone ?? 'N/A' }}
                             </span>
                         </div>
+                    </div>
 
-                        <div class="md:col-span-2 flex flex-col items-start md:items-end space-y-1 md:border-l md:pl-6 border-gray-200">
-                            
-                            <button onclick="openEditModal({{ $patient->id }}, '{{ $patient->first_name }}', '{{ $patient->last_name }}')" class="text-sm font-semibold text-gray-500 hover:text-indigo-800 transition">
-                                Editar
-                            </button>
-                            
-                            <button onclick="openModal('appointmentModal')" class="text-sm font-semibold text-green-600 hover:text-green-800 transition">
-                                Agendar Cita
-                            </button>
+                    {{-- Estado --}}
+                    <div class="text-center px-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $patient->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            <span class="w-2 h-2 mr-2 rounded-full {{ $patient->is_active ? 'bg-green-400' : 'bg-red-400' }}"></span>
+                            {{ $patient->is_active ? 'Activo' : 'Inactivo' }}
+                        </span>
+                        <div class="text-xs text-gray-400 mt-1">
+                            {{ $patient->birth_date ? \Carbon\Carbon::parse($patient->birth_date)->age . ' Años' : '-' }}
                         </div>
+                    </div>
+
+                    {{-- Acciones --}}
+                    <div class="flex items-center gap-3 border-t md:border-t-0 border-gray-100 pt-4 md:pt-0 w-full md:w-auto justify-end">
+                        <button @click="openEdit({{ $patient }})" class="text-gray-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50 group">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        
+                        <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" onsubmit="return confirm('¿Eliminar paciente permanentemente?');">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
             @empty
-                <div class="text-center p-8 bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300">
-                    <p class="text-xl font-semibold text-gray-700">No hay pacientes registrados aún.</p>
-                    <p class="text-gray-500 mt-2">Usa el botón "Registrar Nuevo Paciente" para comenzar.</p>
+                <div class="text-center py-12 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                    <div class="bg-gray-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+                        <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M12 20.573V15m0 0a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">No hay pacientes</h3>
+                    <p class="text-gray-500 mt-1">Comienza registrando uno nuevo al sistema.</p>
                 </div>
             @endforelse
-            
-            @if ($patients->isNotEmpty())
-                <div class="text-center p-4 text-gray-500 font-medium">
-                    --- Fin del listado de pacientes ---
-                </div>
-            @endif
         </div>
-    </div>
 
-    <div id="registerPatientModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 z-50 flex items-center justify-center hidden" tabindex="-1" aria-hidden="true">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
-            <div class="bg-indigo-600 rounded-t-xl px-6 py-4 sm:px-8">
-                <h3 class="text-xl font-bold text-white">Registrar Nuevo Paciente</h3>
-            </div>
+        {{-- 
+            =================================================================
+            MODAL REUTILIZABLE (SIRVE PARA CREAR Y EDITAR)
+            =================================================================
+        --}}
+        <div x-cloak x-show="isModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             
-            <form action="{{ route('patients.store') }}" method="POST" class="p-6 sm:p-8 space-y-6">
-                @csrf
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                        <label for="first_name" class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
-                        <input type="text" name="first_name" id="first_name" required class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="{{ old('first_name') }}">
-                    </div>
-                    <div>
-                        <label for="last_name" class="block text-sm font-semibold text-gray-700 mb-1">Apellido *</label>
-                        <input type="text" name="last_name" id="last_name" required class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="{{ old('last_name') }}">
-                    </div>
-                    <div>
-                        <label for="dni" class="block text-sm font-semibold text-gray-700 mb-1">DNI</label>
-                        <input type="text" name="dni" id="dni" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="{{ old('dni') }}">
-                    </div>
-                    <div>
-                        <label for="birth_date" class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Nacimiento</label>
-                        <input type="date" name="birth_date" id="birth_date" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="{{ old('birth_date') }}">
-                    </div>
-                    <div>
-                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
-                        <input type="tel" name="phone" id="phone" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="{{ old('phone') }}">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" id="email" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="{{ old('email') }}">
-                    </div>
-                </div>
-                <div>
-                    <label for="address" class="block text-sm font-semibold text-gray-700 mb-1">Dirección</label>
-                    <textarea name="address" id="address" rows="3" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150">{{ old('address') }}</textarea>
-                </div>
-                
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <button type="button" onclick="closeModal('registerPatientModal')" class="px-5 py-2 text-base font-medium text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition shadow-sm">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="px-5 py-2 text-base font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition shadow-md">
-                        Guardar Paciente
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+            {{-- Backdrop Oscuro con Blur --}}
+            <div x-show="isModalOpen" 
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
+                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
     
-    <div id="editPatientModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 z-50 flex items-center justify-center hidden" tabindex="-1" aria-hidden="true">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
-            <div class="bg-indigo-600 rounded-t-xl px-6 py-4 sm:px-8">
-                <h3 class="text-xl font-bold text-white">Editar Paciente: <span id="edit-patient-name"></span></h3>
-            </div>
-            
-            {{-- La acción del formulario será actualizada por JavaScript al abrir el modal --}}
-            <form id="editPatientForm" method="POST" class="p-6 sm:p-8 space-y-6">
-                @csrf
-                @method('PUT') {{-- Esto es crucial para la ruta update --}}
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                        <label for="edit_first_name" class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
-                        <input type="text" name="first_name" id="edit_first_name" required class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                {{-- Contenedor del Modal --}}
+                <div x-show="isModalOpen" @click.outside="closeModal()"
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                    
+                    {{-- Cabecera Modal --}}
+                    <div class="bg-white px-6 py-5 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900" x-text="isEditMode ? 'Editar Paciente' : 'Registrar Nuevo Paciente'"></h3>
+                            <p class="text-sm text-gray-500 mt-1" x-text="isEditMode ? 'Actualiza la información clínica.' : 'Ingresa los datos básicos para la ficha.'"></p>
+                        </div>
+                        <button @click="closeModal()" class="text-gray-400 hover:text-gray-500 transition-colors bg-gray-50 hover:bg-gray-100 p-2 rounded-full">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
-                    <div>
-                        <label for="edit_last_name" class="block text-sm font-semibold text-gray-700 mb-1">Apellido *</label>
-                        <input type="text" name="last_name" id="edit_last_name" required class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="">
-                    </div>
-                    <div>
-                        <label for="edit_dni" class="block text-sm font-semibold text-gray-700 mb-1">DNI</label>
-                        <input type="text" name="dni" id="edit_dni" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="">
-                    </div>
-                    <div>
-                        <label for="edit_birth_date" class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Nacimiento</label>
-                        <input type="date" name="birth_date" id="edit_birth_date" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="">
-                    </div>
-                    <div>
-                        <label for="edit_phone" class="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
-                        <input type="tel" name="phone" id="edit_phone" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="">
-                    </div>
-                    <div>
-                        <label for="edit_email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" id="edit_email" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150" value="">
-                    </div>
-                </div>
-                <div>
-                    <label for="edit_address" class="block text-sm font-semibold text-gray-700 mb-1">Dirección</label>
-                    <textarea name="address" id="edit_address" rows="3" class="block w-full border-gray-300 rounded-xl shadow-md py-2 px-4 text-base focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-150"></textarea>
-                </div>
-                
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <button type="button" onclick="closeModal('editPatientModal')" class="px-5 py-2 text-base font-medium text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition shadow-sm">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="px-5 py-2 text-base font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition shadow-md">
-                        Actualizar Paciente
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
     
-    <div id="appointmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 z-50 flex items-center justify-center hidden" tabindex="-1" aria-hidden="true">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 transform transition-all sm:my-8 sm:align-middle">
-            <div class="bg-green-600 rounded-t-xl px-6 py-4 sm:px-8">
-                <h3 class="text-xl font-bold text-white">Agendar Nueva Cita</h3>
-            </div>
-            <div class="p-6 text-center">
-                <p class="text-gray-700">Aquí irá el formulario para agendar una cita.</p>
-                <button onclick="closeModal('appointmentModal')" class="mt-4 px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button>
+                    {{-- Formulario --}}
+                    {{-- Nota: El :action cambia dinámicamente según el modo --}}
+                    <form :action="isEditMode ? '/patients/' + form.id : '{{ route('patients.store') }}'" method="POST" class="p-8">
+                        @csrf
+                        {{-- Truco: agregamos el método PUT oculto solo si estamos editando --}}
+                        <template x-if="isEditMode">
+                            <input type="hidden" name="_method" value="PUT">
+                        </template>
+    
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Nombre --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">NOMBRE <span class="text-red-500">*</span></label>
+                                <input type="text" name="first_name" x-model="form.first_name" required 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 placeholder-gray-400" placeholder="Ej. Juan">
+                            </div>
+    
+                            {{-- Apellido --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">APELLIDO <span class="text-red-500">*</span></label>
+                                <input type="text" name="last_name" x-model="form.last_name" required 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 placeholder-gray-400" placeholder="Ej. Pérez">
+                            </div>
+    
+                            {{-- DNI --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">DNI</label>
+                                <input type="text" name="dni" x-model="form.dni" 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 placeholder-gray-400">
+                            </div>
+    
+                            {{-- Fecha Nacimiento --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">FECHA NACIMIENTO</label>
+                                <input type="date" name="birth_date" x-model="form.birth_date" 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 text-gray-500">
+                            </div>
+    
+                            {{-- Teléfono --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">TELÉFONO</label>
+                                <input type="tel" name="phone" x-model="form.phone" 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 placeholder-gray-400" placeholder="+51 999 999 999">
+                            </div>
+    
+                            {{-- Email --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">CORREO ELECTRÓNICO</label>
+                                <input type="email" name="email" x-model="form.email" 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 placeholder-gray-400" placeholder="juan@ejemplo.com">
+                            </div>
+    
+                            {{-- Dirección (Ocupa 2 columnas) --}}
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="text-sm font-bold text-gray-700 tracking-wide">DIRECCIÓN</label>
+                                <textarea name="address" x-model="form.address" rows="2" 
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 font-medium text-gray-900 placeholder-gray-400 resize-none"></textarea>
+                            </div>
+                        </div>
+    
+                        {{-- Botones Footer --}}
+                        <div class="mt-8 flex items-center justify-end gap-3">
+                            <button type="button" @click="closeModal()" class="px-6 py-3 rounded-xl text-gray-700 font-bold hover:bg-gray-100 transition-colors text-sm">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all transform hover:scale-105 text-sm">
+                                <span x-text="isEditMode ? 'Guardar Cambios' : 'Registrar Paciente'"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+
+    </div> 
 
 
     <script>
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.setAttribute('aria-modal', 'true');
-                modal.setAttribute('role', 'dialog');
-            }
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.removeAttribute('aria-modal');
-                modal.removeAttribute('role');
-            }
-        }
-        
-        // Cierra el modal si se pulsa ESC
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal('registerPatientModal');
-                closeModal('editPatientModal');
-                closeModal('appointmentModal');
-            }
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('patientManagement', () => ({
+                isModalOpen: false,
+                isEditMode: false,
+                // Objeto formulario inicializado vacío
+                form: {
+                    id: '',
+                    first_name: '',
+                    last_name: '',
+                    dni: '',
+                    birth_date: '',
+                    phone: '',
+                    email: '',
+                    address: ''
+                },
+                // Resetear formulario a valores vacíos
+                resetForm() {
+                    this.form = {
+                        id: '', first_name: '', last_name: '', dni: '', 
+                        birth_date: '', phone: '', email: '', address: ''
+                    };
+                },
+                // Abrir modal para CREAR
+                openCreate() {
+                    this.resetForm();
+                    this.isEditMode = false;
+                    this.isModalOpen = true;
+                },
+                // Abrir modal para EDITAR
+                openEdit(patient) {
+                    // Copiar datos del paciente al form
+                    this.form = { ...patient };
+                    
+                    // Limpiar fecha si viene con hora
+                    if(this.form.birth_date) {
+                        this.form.birth_date = this.form.birth_date.split('T')[0];
+                    }
+                    
+                    this.isEditMode = true;
+                    this.isModalOpen = true;
+                },
+                // Cerrar modal
+                closeModal() {
+                    this.isModalOpen = false;
+                }
+            }));
         });
-
-        // ----------------------------------------------------
-        // FUNCIÓN CLAVE: Abre el Modal de Edición y Carga Datos
-        // ----------------------------------------------------
-        function openEditModal(patientId, firstName, lastName) {
-            // 1. Configurar la acción del formulario
-            const form = document.getElementById('editPatientForm');
-            // Usamos una ruta temporal, DEBES ASEGURARTE DE QUE TENER LA RUTA 'patients.update' definida
-            form.action = `/patients/${patientId}`; 
-            
-            // 2. Actualizar el título del modal
-            document.getElementById('edit-patient-name').textContent = `${firstName} ${lastName}`;
-            
-            // 3. (OPCIONAL/MEJOR PRÁCTICA): Cargar los demás datos del paciente vía AJAX
-            // Por ahora, solo precargamos lo que pasamos, pero para el DNI, email, etc.
-            // necesitarías hacer una llamada a una ruta como /patients/{id}/data 
-            // y luego llenar todos los campos (edit_dni, edit_email, etc.)
-            
-            // Ejemplo de llenado básico (solo nombre/apellido):
-            document.getElementById('edit_first_name').value = firstName;
-            document.getElementById('edit_last_name').value = lastName;
-            
-            // ABRE EL MODAL
-            openModal('editPatientModal');
-        }
-
-
     </script>
+
 @endsection

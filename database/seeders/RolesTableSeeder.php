@@ -12,8 +12,7 @@ class RolesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // Limpiar la tabla antes de insertar
-        DB::table('roles')->truncate(); // Usar truncate si la tabla está vacía o delete()
+
 
         // Insertar roles con IDs FIJOS garantizados
         DB::table('roles')->insert([
