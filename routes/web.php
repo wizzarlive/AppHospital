@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PatientController;
-use App\Http\Controllers\DoctorController; // <--- 1. AGREGA ESTA LÍNEA
+use App\Http\Controllers\DoctorController;  
+use App\Http\Controllers\SpecialtyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,7 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('patients', PatientController::class);
     Route::resource('doctors', DoctorController::class);
-    Route::view('/appointments', 'appointments.index')->name('appointments.index');
+    Route::resource('appointments', AppointmentController::class);
+    Route::resource('specialties', SpecialtyController::class);
+
 
 });
 

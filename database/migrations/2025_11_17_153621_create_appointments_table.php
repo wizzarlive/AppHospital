@@ -13,18 +13,25 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('users')->onDelete('restrict');
-            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('restrict');
-            $table->foreignId('specialty_id')->constrained()->onDelete('restrict');
+            
+            // 1. CORRECCIÓN: Apuntamos a la tabla 'patients' (tu tabla administrativa)
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            
+            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade');
+            $table->foreignId('specialty_id')->constrained('specialties')->onDelete('cascade');
 
             $table->date('appointment_date');
-            $table->time('appointment_time');
+            $table->string('appointment_time'); // Usamos string para evitar problemas de formato con el input time
 
             $table->enum('status', ['scheduled', 'confirmed', 'completed', 'canceled', 'missed'])
                   ->default('scheduled');
+            
             $table->string('cancellation_reason')->nullable();
             
-            // INDICE CLAVE para control de disponibilidad
+            // 2. SOLUCIÓN AL ERROR: Agregamos la columna que falta
+            $table->text('observation')->nullable(); 
+            
+            // Evitar duplicados de horario
             $table->unique(['doctor_id', 'appointment_date', 'appointment_time'], 'unique_doctor_slot');
 
             $table->timestamps();

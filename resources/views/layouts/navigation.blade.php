@@ -1,12 +1,4 @@
-{{-- 
-    DISEÑO RESPONSIVO HÍBRIDO:
-    1. Desktop: Barra lateral izquierda (Sidebar)
-    2. Móvil: Barra de navegación inferior (Bottom Tab Bar)
---}}
 
-{{-- ========================================== --}}
-{{-- VISTA DESKTOP (Sidebar Lateral)            --}}
-{{-- ========================================== --}}
 <aside class="hidden md:flex flex-col w-64 bg-white shadow-xl border-r border-gray-200 z-30 h-full transition-all">
     <div class="p-6 flex flex-col h-full">
         
@@ -21,7 +13,6 @@
             
             {{-- Dashboard Link --}}
             <a href="/dashboard" class="group flex items-center p-3 text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out {{ Request::is('dashboard*') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                {{-- Icono Dashboard --}}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 {{ Request::is('dashboard*') ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
@@ -30,11 +21,26 @@
 
             {{-- Pacientes Link --}}
             <a href="{{ route('patients.index') }}" class="group flex items-center p-3 text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out {{ Request::is('patients*') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                {{-- Icono Users --}}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 {{ Request::is('patients*') ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Pacientes
+            </a>
+
+            {{-- Doctores Link --}}
+            <a href="{{ route('doctors.index') }}" class="group flex items-center p-3 text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out {{ Request::is('doctors*') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 {{ Request::is('doctors*') ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Doctores
+            </a>
+
+            {{-- Citas Link --}}
+            <a href="{{ route('appointments.index') }}" class="group flex items-center p-3 text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out {{ Request::is('appointments*') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 {{ Request::is('appointments*') ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Citas Médicas
             </a>
 
         </nav>
@@ -54,9 +60,7 @@
     </div>
 </aside>
 
-{{-- ========================================== --}}
-{{-- VISTA MÓVIL (Barra Inferior Fija)          --}}
-{{-- ========================================== --}}
+
 <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 md:hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
     <div class="flex justify-around items-center h-16 px-2">
         
@@ -74,6 +78,22 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span class="text-[10px] font-medium">Pacientes</span>
+        </a>
+
+        {{-- Doctores Móvil --}}
+        <a href="{{ route('doctors.index') }}" class="flex flex-col items-center justify-center w-full h-full space-y-1 {{ Request::is('doctors*') ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-[10px] font-medium">Doctores</span>
+        </a>
+
+        {{-- Citas Móvil --}}
+        <a href="{{ route('appointments.index') }}" class="flex flex-col items-center justify-center w-full h-full space-y-1 {{ Request::is('appointments*') ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span class="text-[10px] font-medium">Citas</span>
         </a>
 
         {{-- Logout Móvil --}}
